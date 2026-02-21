@@ -1,0 +1,20 @@
+sentinel/
+ ├── core/
+ │    ├── MainLoop.java
+ │    ├── Scheduler.java
+ │
+ ├── monitor/
+ │    ├── IdleDetector.java
+ │
+ ├── engine/
+ │    ├── DecisionEngine.java
+ │    ├── MessageEngine.java
+ │
+ ├── notify/
+ │    ├── Notifier.java
+ │
+ ├── config/
+ │    ├── messages.json
+ │    ├── config.json
+ │
+ └── Main.java
