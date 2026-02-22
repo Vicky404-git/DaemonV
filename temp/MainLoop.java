@@ -3,7 +3,7 @@ public class MainLoop {
     private final DecisionEngine decisionEngine = new DecisionEngine();
 
     public void start() {
-        System.out.println("Sentinel v0.1 started...");
+        System.out.println("DaemonV v0.1 started...");
 
         while (true) {
             decisionEngine.evaluate();

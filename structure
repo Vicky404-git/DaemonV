@@ -1,8 +1,14 @@
-sentinel/
+DaemonV
+ out/(all class files and compiled resources)
+ src/
  ├── core/
  │    ├── MainLoop.java
  │    ├── Scheduler.java
+ |
+ ├──logging/
+ │    ├── EventLogger.java
  │
+ |
  ├── monitor/
  │    ├── IdleDetector.java
  │
@@ -18,3 +24,7 @@ sentinel/
  │    ├── config.json
  │
  └── Main.java
+
+daemonv.log
+structure
+.gitignore
