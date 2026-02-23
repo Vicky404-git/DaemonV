@@ -28,12 +28,13 @@ public class MainLoop {
 
     // Debug Constructor (Used by Debug.java)
     public MainLoop(Scheduler scheduler, boolean manualTrigger, long intervalSeconds, long checkSleepMillis) {
-        this(scheduler, manualTrigger); // Call the main constructor to set up engines
+        this(scheduler, manualTrigger); 
         
         this.checkSleepMillis = checkSleepMillis;
-        
-        // Tell the scheduler to trigger every X seconds instead of 4 hours
         this.scheduler.setCooldownMillis(intervalSeconds * 1000L); 
+        
+        // Tells the scheduler to bypass the 10PM-7AM lock
+        this.scheduler.setIgnoreSilentWindow(true); 
     }
 
     public void start() {
@@ -56,7 +57,6 @@ public class MainLoop {
                     scheduler.markTriggered();
                 }
 
-                // Sleep for the dynamic amount of time (1 sec in debug, 5 mins in main)
                 Thread.sleep(checkSleepMillis); 
 
             } catch (Exception e) {
