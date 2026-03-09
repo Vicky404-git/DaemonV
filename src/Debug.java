@@ -1,5 +1,6 @@
 import cli.Menu;
 import core.ControlServer;
+import core.EnvLoader;
 import core.MainLoop;
 import core.Scheduler;
 
@@ -7,9 +8,12 @@ public class Debug{
 
     public static void main(String[] args) {
 
-        System.out.println("DaemonV v0.1");
-        System.out.println("Mode: Debug Observer");
-        System.out.println("AI: Disabled (Mock)");
+        EnvLoader.load();
+
+        System.out.println("DaemonV v0.2");
+        System.out.println("Mode: Background Observer");
+        // Update the print statement to check if the key loaded
+        System.out.println("AI: " + (EnvLoader.get("GROQ_API_KEY") != null ? "Enabled (Groq)" : "Disabled (Mock)"));
         System.out.println("--------------------------------");
 
         long intervalSeconds = 5;      

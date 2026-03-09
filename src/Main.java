@@ -1,16 +1,19 @@
 import cli.Menu;
 import core.ControlServer;
+import core.EnvLoader;
 import core.MainLoop;
-import core.Scheduler; 
-import java.time.LocalTime; // ADDED THIS IMPORT
+import core.Scheduler; // ADDED THIS IMPORT
+import java.time.LocalTime;
 
 public class Main {
 
     public static void main(String[] args) {
+        EnvLoader.load();
 
-        System.out.println("DaemonV v0.1");
+        System.out.println("DaemonV v0.2");
         System.out.println("Mode: Background Observer");
-        System.out.println("AI: Disabled (Mock)");
+        // Update the print statement to check if the key loaded
+        System.out.println("AI: " + (EnvLoader.get("GROQ_API_KEY") != null ? "Enabled (Groq)" : "Disabled (Mock)"));
         System.out.println("--------------------------------");
 
         Scheduler scheduler = new Scheduler();
