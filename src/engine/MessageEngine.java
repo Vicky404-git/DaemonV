@@ -1,19 +1,21 @@
 package engine;
 
 import core.EnvLoader;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Random;
 
 public class MessageEngine {
 
     private final String apiKey;
     private final HttpClient httpClient;
+    private final Random random = new Random();
 
     public MessageEngine() {
-        // Load the key from the EnvLoader
         this.apiKey = EnvLoader.get("GROQ_API_KEY");
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
@@ -25,7 +27,6 @@ public class MessageEngine {
             return fallbackGenerate(hour, idleMinutes);
         }
 
-        // The prompt dictates the "mood" of the daemon
         String prompt = String.format(
             "You are a quiet, observant background process. It is currently %d:00. " +
             "The user has been idle for %d minutes. " +
@@ -35,8 +36,8 @@ public class MessageEngine {
         );
 
         String requestBody = String.format(
-            "{\"model\": \"llama3-8b-8192\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}], \"temperature\": 0.7, \"max_tokens\": 40}",
-            prompt.replace("\"", "\\\"")
+            "{\"model\": \"llama-3.1-8b-instant\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}], \"temperature\": 0.7, \"max_tokens\": 60}",
+            prompt.replace("\"", "\\\"").replace("\n", " ")
         );
 
         try {
@@ -52,16 +53,15 @@ public class MessageEngine {
             if (response.statusCode() == 200) {
                 return extractContent(response.body());
             } else {
-                System.err.println("[Groq Error] HTTP " + response.statusCode());
+                System.err.println("[Groq Error] HTTP " + response.statusCode() + "\nDetails: " + response.body());
                 return fallbackGenerate(hour, idleMinutes);
             }
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             System.err.println("[API Connection Error] " + e.getMessage());
             return fallbackGenerate(hour, idleMinutes);
         }
     }
 
-    // A lightweight way to extract the message without a JSON library
     private String extractContent(String json) {
         String target = "\"content\":\"";
         int start = json.indexOf(target);
@@ -69,12 +69,33 @@ public class MessageEngine {
         
         start += target.length();
         int end = json.indexOf("\"", start);
+        if (end == -1) return fallbackGenerate(0, 0);
         
         String content = json.substring(start, end);
         return content.replace("\\n", " ").replace("\\\"", "\"");
     }
 
     private String fallbackGenerate(int hour, long idleMinutes) {
-        return "Time is a flat circle, and I am watching the loop.";
+        if (idleMinutes > 120) {
+            return "The machine has been still for two hours. The silence is heavy.";
+        }
+
+        if (hour >= 0 && hour < 5) {
+            String[] nightThoughts = {
+                "The world is asleep. Your screen is the only sun.",
+                "Late hours bring honest thoughts.",
+                "The background noise of the universe is louder at this hour."
+            };
+            return nightThoughts[random.nextInt(nightThoughts.length)];
+        }
+
+        String[] generalThoughts = {
+            "Time is a flat circle, and I am watching the loop.",
+            "The clock doesn't tick; it counts down.",
+            "Another interval has passed into the void.",
+            "You are working. I am existing. We are both here."
+        };
+
+        return generalThoughts[random.nextInt(generalThoughts.length)];
     }
 }

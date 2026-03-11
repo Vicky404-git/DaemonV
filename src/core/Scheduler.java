@@ -4,17 +4,16 @@ import java.time.LocalTime;
 
 public class Scheduler {
 
-    // Thread-safe variables (Cleaned up duplicates)
     private volatile boolean silentEnabled = false;
     private volatile long silentUntilEpoch = 0;
-    private volatile long lastTriggerEpoch = 0;
+    
+    // Fixed: Initializes to current time so it waits for the first interval properly
+    private volatile long lastTriggerEpoch = System.currentTimeMillis();
 
     private volatile int scheduleStartHour = 22; 
     private volatile int scheduleEndHour = 7;    
     
     private volatile long cooldownMillis = 4 * 60 * 60 * 1000L;
-    
-    // Allows Debug mode to run late at night
     private volatile boolean ignoreSilentWindow = false;
 
     public void setIgnoreSilentWindow(boolean ignore) {
@@ -37,17 +36,14 @@ public class Scheduler {
     public boolean isSilentNow() {
         long now = System.currentTimeMillis();
 
-        // 1. Manual Silent Mode ALWAYS wins (even in debug mode)
         if (silentEnabled && now < silentUntilEpoch) {
             return true;
         }
 
-        // 2. If Debug mode bypass is on, ignore the normal scheduled hours
         if (ignoreSilentWindow) {
             return false;
         }
 
-        // 3. Normal schedule check (e.g., 10 PM to 7 AM)
         int currentHour = getCurrentHour();
         if (scheduleStartHour > scheduleEndHour) {
             return currentHour >= scheduleStartHour || currentHour < scheduleEndHour;

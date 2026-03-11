@@ -9,7 +9,7 @@ import java.net.Socket;
 public class ControlServer extends Thread {
 
     private final Scheduler scheduler;
-    private static final int PORT = 9333; // The secret Daemon port
+    private static final int PORT = 9333;
 
     public ControlServer(Scheduler scheduler) {
         this.scheduler = scheduler;
@@ -21,7 +21,6 @@ public class ControlServer extends Thread {
             System.out.println("[Daemon] Control Server listening on port " + PORT);
             
             while (true) {
-                // Wait for the Menu to connect and send a command
                 try (Socket clientSocket = serverSocket.accept();
                      PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                      BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
@@ -29,7 +28,7 @@ public class ControlServer extends Thread {
                     String inputLine = in.readLine();
                     if (inputLine != null) {
                         String response = processCommand(inputLine);
-                        out.println(response); // Send the result back to the Menu
+                        out.println(response); 
                     }
                 } catch (Exception e) {
                     System.out.println("Error handling menu request.");

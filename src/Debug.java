@@ -4,15 +4,12 @@ import core.EnvLoader;
 import core.MainLoop;
 import core.Scheduler;
 
-public class Debug{
-
+public class Debug {
     public static void main(String[] args) {
-
         EnvLoader.load();
 
         System.out.println("DaemonV v0.2");
-        System.out.println("Mode: Background Observer");
-        // Update the print statement to check if the key loaded
+        System.out.println("Mode: Debug Observer");
         System.out.println("AI: " + (EnvLoader.get("GROQ_API_KEY") != null ? "Enabled (Groq)" : "Disabled (Mock)"));
         System.out.println("--------------------------------");
 
@@ -23,7 +20,6 @@ public class Debug{
         boolean manualTrigger = false;
 
         for (int i = 0; i < args.length; i++) {
-
             if (args[i].equals("--silent") && i + 1 < args.length) {
                 try {
                     int minutes = Integer.parseInt(args[i + 1]);
@@ -36,7 +32,7 @@ public class Debug{
             }
 
             if (args[i].equals("--menu")) {
-                new Menu().start(); // FIXED: Empty constructor
+                new Menu().start();
                 return;
             }
 
@@ -70,7 +66,6 @@ public class Debug{
             }
         }
 
-        // ADDED: Start the background listener so the menu works
         ControlServer server = new ControlServer(scheduler);
         server.start();
 

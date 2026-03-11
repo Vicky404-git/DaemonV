@@ -33,7 +33,6 @@ public class MainLoop {
     }
 
     public void start() {
-        // Apply the --ask flag ONCE before the loop starts
         if (this.manualTrigger) {
             scheduler.forceTriggerNow();
         }
@@ -41,11 +40,12 @@ public class MainLoop {
         while (true) {
             try {
                 if (scheduler.isSilentNow()) {
-                    Thread.sleep(60 * 1000);
+                    Thread.sleep(60 * 1000); // Sleep for 1 minute
+                    // Fixed: Prevents instant rapid-fire when waking up from silent window
+                    scheduler.markTriggered(); 
                     continue;
                 }
 
-                // Updated to match the new DecisionEngine signature
                 if (decisionEngine.shouldTrigger(scheduler)) {
                     long idleMinutes = idleDetector.getIdleMinutes();
                     String message = messageEngine.generate(
@@ -54,7 +54,7 @@ public class MainLoop {
                     );
 
                     EventLogger.log(message);
-                    scheduler.markTriggered(); // This resets the timer so it doesn't spam
+                    scheduler.markTriggered(); 
                 }
 
                 Thread.sleep(checkSleepMillis); 

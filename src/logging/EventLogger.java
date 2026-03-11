@@ -26,7 +26,6 @@ public class EventLogger {
 
     private static void sendWindowsNotification(String title, String body) {
         try {
-            // Uses PowerShell to create a system tray notification
             String script = String.format(
                 "Add-Type -AssemblyName System.Windows.Forms; " +
                 "$notify = New-Object System.Windows.Forms.NotifyIcon; " +
@@ -40,4 +39,4 @@ public class EventLogger {
             System.err.println("[System] Windows notification failed: " + e.getMessage());
         }
     }
-}   
+}

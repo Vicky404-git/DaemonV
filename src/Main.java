@@ -2,17 +2,15 @@ import cli.Menu;
 import core.ControlServer;
 import core.EnvLoader;
 import core.MainLoop;
-import core.Scheduler; // ADDED THIS IMPORT
+import core.Scheduler;
 import java.time.LocalTime;
 
 public class Main {
-
     public static void main(String[] args) {
         EnvLoader.load();
 
         System.out.println("DaemonV v0.2");
         System.out.println("Mode: Background Observer");
-        // Update the print statement to check if the key loaded
         System.out.println("AI: " + (EnvLoader.get("GROQ_API_KEY") != null ? "Enabled (Groq)" : "Disabled (Mock)"));
         System.out.println("--------------------------------");
 
@@ -20,11 +18,11 @@ public class Main {
         boolean manualTrigger = false;
 
         for (int i = 0; i < args.length; i++) {
-
             if (args[i].equals("--silent") && i + 1 < args.length) {
                 int minutes = Integer.parseInt(args[i + 1]);
                 scheduler.enableSilentForMinutes(minutes);
                 System.out.println("Silent mode enabled for " + minutes + " minutes.");
+                i++; // Fixed parsing skip
             }
 
             if (args[i].equals("--menu")) {
@@ -45,7 +43,6 @@ public class Main {
         ControlServer server = new ControlServer(scheduler);
         server.start();
 
-        // ADDED: Check if it's night/silent right on startup
         if (scheduler.isSilentNow()) {
             System.out.println("[" + LocalTime.now() + "] It is currently night time (silent window). Daemon is going to sleep...");
         }

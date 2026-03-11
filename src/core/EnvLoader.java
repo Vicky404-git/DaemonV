@@ -12,7 +12,6 @@ public class EnvLoader {
     public static void load() {
         try {
             Files.readAllLines(Paths.get(".env")).forEach(line -> {
-                // Ignore comments and empty lines
                 if (line.contains("=") && !line.trim().startsWith("#")) {
                     String[] parts = line.split("=", 2);
                     envVars.put(parts[0].trim(), parts[1].trim());

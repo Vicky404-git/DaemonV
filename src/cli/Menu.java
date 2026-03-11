@@ -30,7 +30,7 @@ public class Menu {
                     case 2 -> showTriggerMenu();
                     case 3 -> {
                         System.out.println("Exiting menu.");
-                        return; // Exits the menu program completely
+                        return; 
                     }
                     default -> System.out.println("Invalid choice.");
                 }
@@ -69,7 +69,7 @@ public class Menu {
                         sendCommand("SCHEDULE " + start + " " + end);
                     }
                     case 4 -> {
-                        return; // Returns to the Main Menu
+                        return; 
                     }
                     default -> System.out.println("Invalid choice.");
                 }
@@ -100,7 +100,7 @@ public class Menu {
                     }
                     case 2 -> sendCommand("TRIGGER");
                     case 3 -> {
-                        return; // Returns to the Main Menu
+                        return; 
                     }
                     default -> System.out.println("Invalid choice.");
                 }
