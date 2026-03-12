@@ -19,10 +19,14 @@ public class Main {
 
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("--silent") && i + 1 < args.length) {
-                int minutes = Integer.parseInt(args[i + 1]);
-                scheduler.enableSilentForMinutes(minutes);
-                System.out.println("Silent mode enabled for " + minutes + " minutes.");
-                i++; // Fixed parsing skip
+                try {
+                    int minutes = Integer.parseInt(args[i + 1]);
+                    scheduler.enableSilentForMinutes(minutes);
+                    System.out.println("Silent mode enabled for " + minutes + " minutes.");
+                    i++; // Fixed parsing skip
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid number for --silent. Ignoring flag.");
+                }
             }
 
             if (args[i].equals("--menu")) {

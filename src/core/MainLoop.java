@@ -41,8 +41,7 @@ public class MainLoop {
             try {
                 if (scheduler.isSilentNow()) {
                     Thread.sleep(60 * 1000); // Sleep for 1 minute
-                    // Fixed: Prevents instant rapid-fire when waking up from silent window
-                    scheduler.markTriggered(); 
+                    scheduler.markTriggered(); // Pushes the timer forward
                     continue;
                 }
 

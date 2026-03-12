@@ -31,7 +31,9 @@ public class EventLogger {
                 "$notify = New-Object System.Windows.Forms.NotifyIcon; " +
                 "$notify.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon((Get-Process -id $pid).Path); " +
                 "$notify.Visible = $true; " +
-                "$notify.ShowBalloonTip(5000, '%s', '%s', [System.Windows.Forms.ToolTipIcon]::Info);",
+                "$notify.ShowBalloonTip(5000, '%s', '%s', [System.Windows.Forms.ToolTipIcon]::Info); " +
+                "Start-Sleep -Seconds 5; " + // <-- ADDED: Keep process alive for 5 seconds
+                "$notify.Dispose();",        // <-- ADDED: Clean up the system tray icon
                 title, body);
             
             new ProcessBuilder("powershell", "-Command", script).start();
