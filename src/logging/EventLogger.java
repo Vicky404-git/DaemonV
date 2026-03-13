@@ -1,44 +1,37 @@
 package logging;
 
-import java.io.IOException;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 
 public class EventLogger {
+    private static final String DATASET_FILE = "dataset.csv";
 
-    public static void log(String message) {
+    public static void notifyAndLog(String message, long idle, String window, boolean isSilent, String reason) {
         System.out.println("[" + LocalDateTime.now() + "] " + message);
         
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.contains("win")) {
-            sendWindowsNotification("DaemonV", message);
-        } else {
-            sendLinuxNotification("DaemonV", message);
+        if (!isSilent) {
+            try {
+                if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                    String script = String.format("Add-Type -AssemblyName System.Windows.Forms; $n = New-Object System.Windows.Forms.NotifyIcon; $n.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon((Get-Process -id $pid).Path); $n.Visible = $true; $n.ShowBalloonTip(5000, 'DaemonV', '%s', [System.Windows.Forms.ToolTipIcon]::Info); Start-Sleep -Seconds 5; $n.Dispose();", message.replace("'", "''"));
+                    new ProcessBuilder("powershell", "-Command", script).start();
+                } else {
+                    new ProcessBuilder("notify-send", "-a", "DaemonV", "DaemonV", message).start();
+                }
+            } catch (Exception ignored) {}
         }
-    }
 
-    private static void sendLinuxNotification(String title, String body) {
         try {
-            new ProcessBuilder("notify-send", "-a", "DaemonV", title, body).start();
-        } catch (IOException e) {
-            System.err.println("[System] Linux notification failed: " + e.getMessage());
-        }
-    }
-
-    private static void sendWindowsNotification(String title, String body) {
-        try {
-            String script = String.format(
-                "Add-Type -AssemblyName System.Windows.Forms; " +
-                "$notify = New-Object System.Windows.Forms.NotifyIcon; " +
-                "$notify.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon((Get-Process -id $pid).Path); " +
-                "$notify.Visible = $true; " +
-                "$notify.ShowBalloonTip(5000, '%s', '%s', [System.Windows.Forms.ToolTipIcon]::Info); " +
-                "Start-Sleep -Seconds 5; " + // <-- ADDED: Keep process alive for 5 seconds
-                "$notify.Dispose();",        // <-- ADDED: Clean up the system tray icon
-                title, body);
-            
-            new ProcessBuilder("powershell", "-Command", script).start();
-        } catch (IOException e) {
-            System.err.println("[System] Windows notification failed: " + e.getMessage());
-        }
+            File f = new File(DATASET_FILE);
+            if (!f.exists()) {
+                Files.writeString(f.toPath(), "Timestamp,Hour,IdleMinutes,ActiveWindow,IsSilent,TriggerReason,Message\n");
+            }
+            String safeWindow = "\"" + window.replace("\"", "\"\"") + "\"";
+            String safeMsg = "\"" + message.replace("\"", "\"\"") + "\"";
+            String row = String.format("%s,%d,%d,%s,%b,%s,%s\n", 
+                LocalDateTime.now(), LocalDateTime.now().getHour(), idle, safeWindow, isSilent, reason, safeMsg);
+            Files.writeString(f.toPath(), row, StandardOpenOption.APPEND);
+        } catch (Exception ignored) {}
     }
 }

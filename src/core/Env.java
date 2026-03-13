@@ -5,24 +5,21 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EnvLoader {
-
-    private static final Map<String, String> envVars = new HashMap<>();
+public class Env {
+    private static final Map<String, String> ENV = new HashMap<>();
 
     public static void load() {
         try {
             Files.readAllLines(Paths.get(".env")).forEach(line -> {
                 if (line.contains("=") && !line.trim().startsWith("#")) {
                     String[] parts = line.split("=", 2);
-                    envVars.put(parts[0].trim(), parts[1].trim());
+                    ENV.put(parts[0].trim(), parts[1].trim());
                 }
             });
-        } catch (Exception e) {
-            System.out.println("[System] No .env file found. Falling back to system environment variables.");
-        }
+        } catch (Exception ignored) {}
     }
 
     public static String get(String key) {
-        return envVars.getOrDefault(key, System.getenv(key));
+        return ENV.getOrDefault(key, System.getenv(key));
     }
 }
