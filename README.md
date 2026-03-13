@@ -53,21 +53,24 @@ No overengineering.
 
 * Utilizes Groq (Llama 3.1) API for context-aware message generation
 * Messages are based on current time and idle duration
+* **Message Generation Logic:** Implemented in `MessageEngine.java`, which uses the Groq API to generate messages based on the current hour and idle duration
 
 ### Silent Modes
 
-* **Temporary Silent Mode:** Can be enabled for a specified duration
-* **Scheduled Silent Window:** Configurable start and end hours (default 22:00 → 07:00)
+* **Temporary Silent Mode:** Can be enabled for a specified duration using the `enableSilent` method in `Daemon.java`
+* **Scheduled Silent Window:** Configurable start and end hours (default 22:00 → 07:00) using the `setSchedule` method in `Daemon.java`
 
 ### Control and Monitoring
 
-* **Lightweight CLI Control Server:** Accessible on Port 9333
-* **Debug Mode:** Fast cycle for testing and development
+* **Lightweight CLI Control Server:** Accessible on Port 9333, implemented in `Remote.java`
+* **Debug Mode:** Fast cycle for testing and development, configurable using the `setDebugMode` method in `Daemon.java`
+* **Force Trigger:** Can be used to force a notification trigger using the `forceTrigger` method in `Daemon.java`
 
 ### System Monitoring
 
-* **Idle Detection:** Tracks system idle time
-* **Active Window Detection:** Identifies the currently active window
+* **Idle Detection:** Tracks system idle time, implemented in `SystemMonitor.java`
+* **Active Window Detection:** Identifies the currently active window, implemented in `SystemMonitor.java`
+* **Event Logging:** Logs events and notifications, implemented in `EventLogger.java`
 
 ## Build & Run
 See USER_MANUAL.md for full setup instructions, including API key configuration.
@@ -85,10 +88,10 @@ java -cp out Main
 
 ## Configuration
 
-* **API Key:** Required for Groq (Llama 3.1) API access
-* **Silent Window:** Configurable start and end hours
-* **Interval:** Configurable interval for notifications
-* **Debug Interval:** Configurable interval for debug mode
+* **API Key:** Required for Groq (Llama 3.1) API access, loaded from environment variables using `Env.java`
+* **Silent Window:** Configurable start and end hours using the `setSchedule` method in `Daemon.java`
+* **Interval:** Configurable interval for notifications using the `setInterval` method in `Daemon.java`
+* **Debug Interval:** Configurable interval for debug mode using the `setDebugMode` method in `Daemon.java`
 
 ## Roadmap
 - ~~v0.2 → AI-based message generation~~ (Done)
