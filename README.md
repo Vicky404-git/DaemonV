@@ -26,25 +26,48 @@ No GUI.
 No heavy frameworks.
 No bloated dependencies.
 
-### What It Does (v0.2)
+### What It Does
 
 * Runs continuously in the background
 * **AI-Generated Observations:** Uses Groq (Llama 3.1) to generate context-aware thoughts based on time and idle duration
 * **OS Notifications:** Triggers native desktop toasts (Windows PowerShell / Linux `notify-send`)
-* Debug mode (fast cycle) & Production mode (long interval)
-* Temporary silent mode & Scheduled silent window (default 22:00 → 07:00)
-* Lightweight CLI control server (Port 9333)
-* Logs activity locally
+* **Debug Mode:** Fast cycle for testing and development
+* **Production Mode:** Long interval for normal operation
+* **Temporary Silent Mode:** Mutes notifications for a specified duration
+* **Scheduled Silent Window:** Default 22:00 → 07:00, configurable
+* **Lightweight CLI Control Server:** Listens on Port 9333
+* **Local Logging:** Activity logs are stored locally
 
 It wakes up.
 Checks time.
 Decides.
 Sleeps again.
 
-
 Single main loop.
 Control thread for runtime commands.
 No overengineering.
+
+## Features
+
+### AI-Generated Observations
+
+* Utilizes Groq (Llama 3.1) API for context-aware message generation
+* Messages are based on current time and idle duration
+
+### Silent Modes
+
+* **Temporary Silent Mode:** Can be enabled for a specified duration
+* **Scheduled Silent Window:** Configurable start and end hours (default 22:00 → 07:00)
+
+### Control and Monitoring
+
+* **Lightweight CLI Control Server:** Accessible on Port 9333
+* **Debug Mode:** Fast cycle for testing and development
+
+### System Monitoring
+
+* **Idle Detection:** Tracks system idle time
+* **Active Window Detection:** Identifies the currently active window
 
 ## Build & Run
 See USER_MANUAL.md for full setup instructions, including API key configuration.
@@ -59,27 +82,18 @@ See USER_MANUAL.md for full setup instructions, including API key configuration.
 ```Bash
 java -cp out Main
 ```
-### Why This Exists
-Sometimes I don’t want an app.
 
-I want a presence.
+## Configuration
 
-Something small.
-Something local.
-Something that runs quietly
-and occasionally breaks the silence.
+* **API Key:** Required for Groq (Llama 3.1) API access
+* **Silent Window:** Configurable start and end hours
+* **Interval:** Configurable interval for notifications
+* **Debug Interval:** Configurable interval for debug mode
 
-Not motivation.
-Not advice.
-Just a signal.
-
-### Roadmap
+## Roadmap
 - ~~v0.2 → AI-based message generation~~ (Done)
-
 - ~~v0.3 → OS notifications~~ (Done)
-
 - v0.4 → Real idle detection (Native OS hooks)
-
 - v0.5 → Local model option (Ollama integration)
 
 The daemon will evolve slowly.

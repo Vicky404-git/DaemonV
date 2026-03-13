@@ -4,6 +4,13 @@
 # Log files
 *.log
 
+# Local Data / Behavioral Datasets
+dataset.csv
+*.csv
+
+# Environment variables (API Keys)
+.env
+
 # Package files
 *.jar
 *.war
@@ -17,9 +24,6 @@
 # OS files
 .DS_Store
 Thumbs.db
-
-# Environment variables
-.env
 
 # Build folders
 build/
