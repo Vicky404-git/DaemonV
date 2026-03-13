@@ -60,7 +60,7 @@ public class Debug {
         try {
             MessageEngine engine = new MessageEngine();
             // Simulating a test where the user is looking at VSCode
-            String msg = engine.generate(14, 0, "Visual Studio Code");
+            String msg = engine.generate(14, 0, "Code | Visual Studio Code", true);
             System.out.println("OK");
             System.out.println("\n[AI Output]: " + msg);
         } catch (Exception e) {

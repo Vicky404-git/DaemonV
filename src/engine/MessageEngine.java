@@ -1,27 +1,29 @@
 package engine;
 
 import core.Env;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.*;
 import java.time.Duration;
-import java.util.Random;
 
 public class MessageEngine {
     private final String apiKey = Env.get("GROQ_API_KEY");
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
-    private final Random random = new Random();
 
-    public String generate(int hour, long idleMinutes, String activeWindow) {
+    // ADDED: isAudio parameter
+    public String generate(int hour, long idleMinutes, String activeWindow, boolean isAudio) {
         if (apiKey == null || apiKey.isEmpty()) return fallback(hour, idleMinutes);
 
-        String windowCtx = activeWindow.equals("Unknown") ? "" : " They are currently looking at an app/window titled: '" + activeWindow + "'.";
+        // Tell the AI exactly what software is open and if music is playing
+        String windowCtx = activeWindow.equals("Unknown") ? "" : " They are focusing on the software/window: '" + activeWindow + "'.";
+        String audioCtx = isAudio ? " Background music or audio is currently playing." : " The environment is completely silent (no audio).";
         
         String prompt = String.format(
             "You are a quiet, observant background process. It is currently %d:00. " +
-            "The user has been idle for %d minutes.%s " +
-            "Generate a single, short, atmospheric sentence about time, presence, or their current context. " +
+            "The user has been idle for %d minutes.%s%s " +
+            "Generate a single, short, atmospheric sentence about their current context, software, or presence. " +
             "Do not use quotes. Do not offer help. Do not act like an AI.", 
-            hour, idleMinutes, windowCtx
+            hour, idleMinutes, windowCtx, audioCtx
         );
 
         String body = String.format("{\"model\": \"llama-3.1-8b-instant\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}], \"temperature\": 0.7, \"max_tokens\": 60}", 
@@ -39,7 +41,7 @@ public class MessageEngine {
                 int end = res.body().indexOf("\"", start);
                 return res.body().substring(start, end).replace("\\n", " ").replace("\\\"", "\"");
             }
-        } catch (Exception ignored) {}
+        } catch (IOException | InterruptedException ignored) {}
         return fallback(hour, idleMinutes);
     }
 

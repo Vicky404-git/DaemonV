@@ -1,9 +1,9 @@
 package core;
 
 import engine.MessageEngine;
+import java.time.LocalTime;
 import logging.EventLogger;
 import monitor.SystemMonitor;
-import java.time.LocalTime;
 
 public class Daemon {
     private volatile boolean silentEnabled = false;
@@ -42,12 +42,14 @@ public class Daemon {
         return (scheduleStartHour > scheduleEndHour) ? (h >= scheduleStartHour || h < scheduleEndHour) : (h >= scheduleStartHour && h < scheduleEndHour);
     }
 
+    @SuppressWarnings("BusyWait")
     public void start() {
         while (true) {
             try {
                 boolean silent = isSilentNow();
                 long idle = SystemMonitor.getIdleMinutes();
                 String window = SystemMonitor.getActiveWindow();
+                boolean isAudio = SystemMonitor.isAudioPlaying(); // ADDED: Check audio
 
                 if (silent) {
                     EventLogger.notifyAndLog("Skipped (Silent Mode)", idle, window, true, "Silent Window Active");
@@ -57,13 +59,19 @@ public class Daemon {
                 }
 
                 if ((System.currentTimeMillis() - lastTriggerEpoch) >= cooldownMillis) {
-                    String msg = ai.generate(LocalTime.now().getHour(), idle, window);
+                    // ADDED: Pass the audio state to the AI
+                    String msg = ai.generate(LocalTime.now().getHour(), idle, window, isAudio);
                     EventLogger.notifyAndLog(msg, idle, window, false, "Interval Trigger");
                     lastTriggerEpoch = System.currentTimeMillis();
                 }
 
                 Thread.sleep(checkSleepMillis);
-            } catch (Exception e) { e.printStackTrace(); }
+            } catch (InterruptedException e) { 
+                System.err.println("Daemon thread interrupted.");
+                break; 
+            } catch (Exception e) { 
+                e.printStackTrace(); 
+            }
         }
     }
 }
