@@ -4,8 +4,9 @@ import java.awt.HeadlessException;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 
 public class SystemMonitor {
     private static Point lastLocation = null;
@@ -26,33 +27,51 @@ public class SystemMonitor {
     public static String getActiveWindow() {
         try {
             String os = System.getProperty("os.name").toLowerCase();
-            ProcessBuilder pb;
             if (os.contains("win")) {
-                // Extracts BOTH the Process Name (.exe) and the Window Title
-                String script = "Add-Type @\"\nusing System; using System.Runtime.InteropServices;\n" +
-                    "public class API { [DllImport(\"user32.dll\")] public static extern IntPtr GetForegroundWindow(); " +
-                    "[DllImport(\"user32.dll\")] public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId); " +
-                    "[DllImport(\"user32.dll\")] public static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder text, int count); }\n\"@\n" +
-                    "$hwnd = [API]::GetForegroundWindow(); $pid = 0; [API]::GetWindowThreadProcessId($hwnd, [ref]$pid) > $null; " +
-                    "$proc = Get-Process -Id $pid -ErrorAction SilentlyContinue; " +
-                    "$title = New-Object System.Text.StringBuilder 256; [API]::GetWindowText($hwnd, $title, 256) > $null; " +
-                    "Write-Output \"$($proc.ProcessName) | $($title.ToString())\"";
-                pb = new ProcessBuilder("powershell", "-Command", script);
+                // FIX: Write to a temp .ps1 file so newlines aren't destroyed by Java
+                String script = "Add-Type @\"\n" +
+                    "using System;\n" +
+                    "using System.Runtime.InteropServices;\n" +
+                    "public class API {\n" +
+                    "    [DllImport(\"user32.dll\")] public static extern IntPtr GetForegroundWindow();\n" +
+                    "    [DllImport(\"user32.dll\")] public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);\n" +
+                    "    [DllImport(\"user32.dll\")] public static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder text, int count);\n" +
+                    "}\n" +
+                    "\"@\n" +
+                    "$hwnd = [API]::GetForegroundWindow()\n" +
+                    "$pid = 0\n" +
+                    "[API]::GetWindowThreadProcessId($hwnd, [ref]$pid) > $null\n" +
+                    "$proc = Get-Process -Id $pid -ErrorAction SilentlyContinue\n" +
+                    "$title = New-Object System.Text.StringBuilder 256\n" +
+                    "[API]::GetWindowText($hwnd, $title, 256) > $null\n" +
+                    "Write-Output \"$($proc.ProcessName) | $($title.ToString())\"\n";
+
+                File tempFile = File.createTempFile("daemonv_window", ".ps1");
+                Files.writeString(tempFile.toPath(), script);
+
+                Process p = new ProcessBuilder("powershell", "-ExecutionPolicy", "Bypass", "-File", tempFile.getAbsolutePath()).start();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String line = reader.readLine();
+                
+                tempFile.delete(); // Clean up the temp file instantly
+
+                return (line != null && !line.isEmpty()) ? line.trim() : "Desktop";
             } else {
-                pb = new ProcessBuilder("sh", "-c", "xdotool getwindowfocus getwindowname");
+                Process p = new ProcessBuilder("sh", "-c", "xdotool getwindowfocus getwindowname").start();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String line = reader.readLine();
+                return (line != null && !line.isEmpty()) ? line.trim() : "Desktop";
             }
-            Process p = pb.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line = reader.readLine();
-            return (line != null && !line.isEmpty()) ? line.trim() : "Unknown";
-        } catch (IOException e) { return "Unknown"; }
+        } catch (Exception e) { 
+            return "Unknown"; 
+        }
     }
 
     public static boolean isAudioPlaying() {
         try {
             String os = System.getProperty("os.name").toLowerCase();
             if (os.contains("win")) {
-                // Windows Zero-Dependency Heuristic: Checks if known music players are running
+                // Windows Heuristic: Checks if common music players are running
                 Process p = new ProcessBuilder("tasklist").start();
                 BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
                 String line;
