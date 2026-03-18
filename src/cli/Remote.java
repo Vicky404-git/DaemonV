@@ -18,13 +18,28 @@ public class Remote {
                          PrintWriter out = new PrintWriter(client.getOutputStream(), true);
                          BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()))) {
                         
-                        String[] parts = in.readLine().split(" ");
-                        switch (parts[0].toUpperCase()) {
+                        String line = in.readLine();
+
+                        if (line == null || line.isBlank()) {
+                            out.println("Invalid command.");
+                            return;
+                        }
+                            
+                        String[] parts = line.trim().split("\\s+");
+                        String cmd = parts[0].toUpperCase();
+                        switch (cmd) {
                             case "STATUS": out.println("Silent active: " + daemon.isSilentNow()); break;
                             case "SILENT": daemon.enableSilent(Integer.parseInt(parts[1])); out.println("Silenced."); break;
                             case "SCHEDULE": daemon.setSchedule(Integer.parseInt(parts[1]), Integer.parseInt(parts[2])); out.println("Scheduled."); break;
                             case "INTERVAL": daemon.setInterval(Long.parseLong(parts[1])); out.println("Interval updated."); break;
                             case "TRIGGER": daemon.forceTrigger(); out.println("Trigger queued."); break;
+                            
+                            case "EXIT": 
+                                out.println("Daemon shutting down... Goodbye!"); 
+                                daemon.stop(); 
+                                System.exit(0); // This physically kills the background Java process
+                                break;
+                                
                             default: out.println("Unknown command.");
                         }
                     } catch (Exception ignored) {}
@@ -36,15 +51,18 @@ public class Remote {
     public static void startMenu() {
         Scanner s = new Scanner(System.in);
         while (true) {
-            System.out.println("\n==== DaemonV Menu ====\n1. Silence (minutes)\n2. Set Interval (seconds)\n3. Force Trigger\n4. Exit");
+            System.out.println("\n==== DaemonV Menu ====\n1. Silence (minutes)\n2. Set Interval (seconds)\n3. Force Trigger\n4. Status\n5. Exit Daemon\n6. Exit CLI");
             System.out.print("> ");
             String input = s.nextLine();
-            if (input.equals("4")) return;
+            if (input.equals("6")) return;
             
             try {
                 if (input.equals("1")) { System.out.print("Minutes: "); send("SILENT " + s.nextLine()); }
                 else if (input.equals("2")) { System.out.print("Seconds: "); send("INTERVAL " + s.nextLine()); }
                 else if (input.equals("3")) { send("TRIGGER"); }
+                else if(input.equals("4")) { send("STATUS"); }
+                else if(input.equals("5")) { send("EXIT"); System.out.println("Waiting for Daemon to stop...");return; }
+                else { System.out.println("Invalid option."); }
             } catch (Exception e) { System.out.println("Invalid input."); }
         }
     }
