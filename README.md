@@ -72,6 +72,49 @@ No overengineering.
 * **Active Window Detection:** Identifies the currently active window, implemented in `SystemMonitor.java`
 * **Event Logging:** Logs events and notifications, implemented in `EventLogger.java`
 
+## Technical Details
+
+### Daemon Class
+
+The `Daemon` class is the core of the application. It has the following properties:
+
+* `silentEnabled`: A flag indicating whether silent mode is enabled
+* `silentUntilEpoch`: The epoch time until which silent mode is enabled
+* `silentLogged`: A flag indicating whether silent mode has been logged
+* `lastTriggerEpoch`: The epoch time of the last trigger
+* `scheduleStartHour` and `scheduleEndHour`: The start and end hours of the scheduled silent window
+* `cooldownMillis` and `checkSleepMillis`: The cooldown and check sleep intervals
+* `ignoreSilentWindow`: A flag indicating whether to ignore the silent window
+* `ai`: An instance of the `MessageEngine` class
+* `running`: A flag indicating whether the daemon is running
+
+The `Daemon` class has the following methods:
+
+* `setDebugMode`: Sets the debug mode interval
+* `enableSilent`: Enables silent mode for a specified duration
+* `setSchedule`: Sets the scheduled silent window
+* `setInterval`: Sets the notification interval
+* `forceTrigger`: Forces a notification trigger
+* `isSilentNow`: Checks if silent mode is enabled
+* `start`: Starts the daemon
+* `stop`: Stops the daemon
+
+### Remote Class
+
+The `Remote` class implements a lightweight CLI control server that listens on Port 9333. It has the following methods:
+
+* `startServer`: Starts the control server
+* `startMenu`: Starts the control menu
+* `send`: Sends a command to the control server
+
+### MessageEngine Class
+
+The `MessageEngine` class generates context-aware messages based on the current time and idle duration. It uses the Groq (Llama 3.1) API to generate messages.
+
+### SystemMonitor Class
+
+The `SystemMonitor` class tracks system idle time, identifies the currently active window, and logs events and notifications.
+
 ## Build & Run
 See USER_MANUAL.md for full setup instructions, including API key configuration.
 
