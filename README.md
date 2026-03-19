@@ -115,6 +115,10 @@ The `MessageEngine` class generates context-aware messages based on the current 
 
 The `SystemMonitor` class tracks system idle time, identifies the currently active window, and logs events and notifications.
 
+### BehaviorEngine Class
+
+The `BehaviorEngine` class classifies system behavior based on idle duration, active window, and audio playback.
+
 ## Build & Run
 See USER_MANUAL.md for full setup instructions, including API key configuration.
 
