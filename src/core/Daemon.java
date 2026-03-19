@@ -1,15 +1,21 @@
 package core;
 
+import engine.BehaviorEngine;
 import engine.MessageEngine;
 import java.time.LocalTime;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import logging.EventLogger;
 import monitor.SystemMonitor;
+
 
 public class Daemon {
 
     private volatile boolean silentEnabled = false;
     private volatile long silentUntilEpoch = 0;
     private boolean silentLogged = false;
+
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private volatile long lastTriggerEpoch = System.currentTimeMillis();
 
@@ -69,7 +75,8 @@ public class Daemon {
                 long idle = SystemMonitor.getIdleMinutes();
                 String window = SystemMonitor.getActiveWindow();
                 boolean isAudio = SystemMonitor.isAudioPlaying();
-
+                String state = BehaviorEngine.classify(idle, window, isAudio);
+                
                 // 💤 Silent Mode
                 if (silent) {
                     if (!silentLogged) {
@@ -97,22 +104,23 @@ public class Daemon {
                 }
 
                 // 🤖 AI async trigger
-                new Thread(() -> {
+                executor.submit(() -> {
                     String msg = ai.generate(
                             LocalTime.now().getHour(),
                             idle,
                             window,
-                            isAudio
+                            isAudio,
+                            state
                     );
-
+                
                     EventLogger.notifyAndLog(
                             msg,
                             idle,
                             window,
                             false,
-                            "Interval Trigger"
+                            state
                     );
-                }).start();
+                });
 
                 lastTriggerEpoch = now;
 
@@ -130,5 +138,6 @@ public class Daemon {
     public void stop() {
         System.out.println("Stopping DaemonV...");
         running = false;
+        executor.shutdownNow();
     }
 }

@@ -11,19 +11,20 @@ public class MessageEngine {
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
     // ADDED: isAudio parameter
-    public String generate(int hour, long idleMinutes, String activeWindow, boolean isAudio) {
+    public String generate(int hour, long idleMinutes, String activeWindow, boolean isAudio, String state) {
         if (apiKey == null || apiKey.isEmpty()) return fallback(hour, idleMinutes);
 
         // Tell the AI exactly what software is open and if music is playing
         String windowCtx = activeWindow.equals("Unknown") ? "" : " They are focusing on the software/window: '" + activeWindow + "'.";
         String audioCtx = isAudio ? " Background music or audio is currently playing." : " The environment is completely silent (no audio).";
+        String stateCtx = " Current state: " + state + ".";
         
         String prompt = String.format(
             "You are a quiet, observant background process. It is currently %d:00. " +
-            "The user has been idle for %d minutes.%s%s " +
+            "The user has been idle for %d minutes.%s%s%s " +
             "Generate a single, short, atmospheric sentence about their current context, software, or presence. " +
-            "Do not use quotes. Do not offer help. Do not act like an AI.", 
-            hour, idleMinutes, windowCtx, audioCtx
+            "Do not use quotes. Do not offer help. Do not act like an AI.",
+            hour, idleMinutes, windowCtx, audioCtx, stateCtx
         );
 
         String body = String.format("{\"model\": \"llama-3.1-8b-instant\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}], \"temperature\": 0.7, \"max_tokens\": 60}", 

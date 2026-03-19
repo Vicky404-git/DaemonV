@@ -1,6 +1,7 @@
 import cli.Remote;
 import core.Daemon;
 import core.Env;
+import engine.BehaviorEngine;
 import engine.MessageEngine;
 import logging.EventLogger;
 import monitor.SystemMonitor;
@@ -60,7 +61,12 @@ public class Debug {
         try {
             MessageEngine engine = new MessageEngine();
             // Simulating a test where the user is looking at VSCode
-            String msg = engine.generate(14, 0, "Code | Visual Studio Code", true);
+            String state = BehaviorEngine.classify(0, "Code | Visual Studio Code", true);
+            String msg = engine.generate(
+                14,0,
+                "Code | Visual Studio Code",
+                 true,
+                 state);
             System.out.println("OK");
             System.out.println("\n[AI Output]: " + msg);
         } catch (Exception e) {

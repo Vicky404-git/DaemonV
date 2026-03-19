@@ -8,12 +8,13 @@ import java.util.Scanner;
 
 public class Remote {
     private static final int PORT = 9333;
+    private static volatile boolean serverRunning = true;
 
     public static void startServer(Daemon daemon) {
         new Thread(() -> {
             try (ServerSocket server = new ServerSocket(PORT)) {
                 System.out.println("[Daemon] Control Server listening on port " + PORT);
-                while (true) {
+                while (serverRunning) {
                     try (Socket client = server.accept();
                          PrintWriter out = new PrintWriter(client.getOutputStream(), true);
                          BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()))) {
@@ -22,22 +23,49 @@ public class Remote {
 
                         if (line == null || line.isBlank()) {
                             out.println("Invalid command.");
-                            return;
+                            continue;
                         }
                             
                         String[] parts = line.trim().split("\\s+");
                         String cmd = parts[0].toUpperCase();
                         switch (cmd) {
                             case "STATUS": out.println("Silent active: " + daemon.isSilentNow()); break;
-                            case "SILENT": daemon.enableSilent(Integer.parseInt(parts[1])); out.println("Silenced."); break;
-                            case "SCHEDULE": daemon.setSchedule(Integer.parseInt(parts[1]), Integer.parseInt(parts[2])); out.println("Scheduled."); break;
-                            case "INTERVAL": daemon.setInterval(Long.parseLong(parts[1])); out.println("Interval updated."); break;
-                            case "TRIGGER": daemon.forceTrigger(); out.println("Trigger queued."); break;
-                            
+                            case "SILENT":
+                                if (parts.length < 2) {
+                                     out.println("Usage: SILENT <minutes>");
+                                     break;
+                                    }
+                                daemon.enableSilent(Integer.parseInt(parts[1]));
+                                out.println("Silenced.");
+                                break;
+                            case "SCHEDULE":
+                                if (parts.length < 3) {
+                                    out.println("Usage: SCHEDULE <start> <end>");
+                                        break;
+                                    }
+                                daemon.setSchedule(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+                                out.println("Scheduled.");
+                                break;
+                            case "INTERVAL":
+                                if (parts.length < 2) {
+                                    out.println("Usage: INTERVAL <seconds>");
+                                    break;
+                                }
+                                daemon.setInterval(Long.parseLong(parts[1]));
+                                out.println("Interval updated.");
+                                break;
+                            case "TRIGGER":
+                                if (parts.length > 1) {
+                                    out.println("Usage: TRIGGER");
+                                    break;
+                                }
+                                daemon.forceTrigger();
+                                out.println("Trigger queued.");
+                                break;
                             case "EXIT": 
                                 out.println("Daemon shutting down... Goodbye!"); 
                                 daemon.stop(); 
-                                System.exit(0); // This physically kills the background Java process
+                                serverRunning = false;
                                 break;
                                 
                             default: out.println("Unknown command.");
