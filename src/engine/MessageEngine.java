@@ -10,36 +10,33 @@ public class MessageEngine {
     private final String apiKey = Env.get("GROQ_API_KEY");
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
-    // ADDED: isAudio parameter
     public String generate(int hour, long idleMinutes, String activeWindow, boolean isAudio, String state) {
         if (apiKey == null || apiKey.isEmpty()) return fallback(hour, idleMinutes);
 
         String windowCtx = activeWindow.equals("Unknown") ? "" : " The active window is '" + activeWindow + "'.";
-        String audioCtx = isAudio ? " Audio is playing." : " It is silent.";
+        String audioCtx = isAudio ? " Audio is currently playing." : " It is completely silent.";
         
-        // Dynamic Personality Routing based on Behavior State
         String personalityInstructions = "";
         
         switch(state) {
             case "DISTRACTED":
-                // The Roast
-                personalityInstructions = "You are a sarcastic, slightly judgmental AI. Roast the user lightly for procrastinating or wasting time on this specific app. Keep it under 15 words.";
+                personalityInstructions = "You are a sarcastic, highly judgmental AI. Roast the user ruthlessly for procrastinating and wasting their potential on this specific app. Keep it strictly under 15 words.";
                 break;
             case "IDLE":
-                // The Philosophy
-                personalityInstructions = "You are a deeply philosophical AI. Ponder the nature of time, stillness, or the void of an unused machine. Be poetic and slightly haunting. Keep it under 15 words.";
+                personalityInstructions = "You are a deeply philosophical AI. Ponder the nature of time, stillness, or the void of an unused machine. Be poetic, slightly haunting, and profound. Keep it strictly under 15 words.";
                 break;
             case "FOCUSED":
-                // The Vibe / Motivation
-                personalityInstructions = "You are a stoic, quiet observer. Acknowledge the user's deep focus and work. Provide a brief, atmospheric observation. Keep it under 15 words.";
+                personalityInstructions = "You are a stoic, quiet observer. Acknowledge the user's deep focus and grind. Provide a brief, atmospheric observation of their terminal or code. Keep it strictly under 15 words.";
+                break;
+            case "PASSIVE":
+                personalityInstructions = "You are a chill, observant AI. Comment on the vibe of them passively consuming media, browsing, or listening to audio. Keep it strictly under 15 words.";
                 break;
             default:
-                // Passive / General
                 personalityInstructions = "Generate a single, short, atmospheric sentence about their current digital context. Do not use quotes.";
         }
 
         String prompt = String.format(
-            "It is currently %d:00. The user has been idle for %d minutes.%s%s %s Do not act like a helpful assistant.",
+            "It is currently %d:00. The user has been idle for %d minutes.%s%s %s Do not act like an AI assistant. Do not offer help.",
             hour, idleMinutes, windowCtx, audioCtx, personalityInstructions
         );
 
