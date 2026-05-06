@@ -1,6 +1,7 @@
 package cli;
 
 import core.Daemon;
+import logging.EventLogger;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -62,6 +63,16 @@ public class Remote {
                                 daemon.forceTrigger();
                                 out.println("Trigger queued.");
                                 break;
+                            case "NOTIFY":
+                                if (line.length() > 7) {
+                                    String msg = line.substring(7).trim(); // Extract everything after "NOTIFY "
+                                    // Trigger the desktop popup and log it!
+                                    EventLogger.notifyAndLog("Kosmo: " + msg, 0, "SOZO", false, "Kosmo Reminder");
+                                    out.println("Notification sent.");
+                                } else {
+                                    out.println("Usage: NOTIFY <message>");
+                                }
+                                break;
                             case "EXIT": 
                                 out.println("Daemon shutting down... Goodbye!"); 
                                 daemon.stop(); 
@@ -79,22 +90,28 @@ public class Remote {
     public static void startMenu() {
         Scanner s = new Scanner(System.in);
         while (true) {
-            System.out.println("\n==== DaemonV Menu ====\n1. Silence (minutes)\n2. Set Interval (seconds)\n3. Force Trigger\n4. Status\n5. Exit Daemon\n6. Exit CLI");
+            System.out.println("\n==== DaemonV Menu ====\n1. Silence (minutes)\n2. Set Interval (seconds)\n3. Force Trigger\n4. Status\n5. Test Notify\n6. Exit Daemon\n7. Exit CLI");
             System.out.print("> ");
             String input = s.nextLine();
-            if (input.equals("6")) return;
+            
+            // Fix: Change the immediate exit to option 7
+            if (input.equals("7")) return; 
             
             try {
                 if (input.equals("1")) { System.out.print("Minutes: "); send("SILENT " + s.nextLine()); }
                 else if (input.equals("2")) { System.out.print("Seconds: "); send("INTERVAL " + s.nextLine()); }
                 else if (input.equals("3")) { send("TRIGGER"); }
-                else if(input.equals("4")) { send("STATUS"); }
-                else if(input.equals("5")) { send("EXIT"); System.out.println("Waiting for Daemon to stop...");return; }
+                else if (input.equals("4")) { send("STATUS"); }
+                // Fix: Send a test message so the server doesn't complain about "Usage: NOTIFY <message>"
+                else if (input.equals("5")) { send("NOTIFY test → this is a manual test"); }
+                // Fix: Shift EXIT to option 6
+                else if (input.equals("6")) { send("EXIT"); System.out.println("Waiting for Daemon to stop..."); return; }
                 else { System.out.println("Invalid option."); }
             } catch (Exception e) { System.out.println("Invalid input."); }
         }
     }
 
+    // MISSING METHOD RESTORED BELOW:
     private static void send(String cmd) {
         try (Socket socket = new Socket("localhost", PORT);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);

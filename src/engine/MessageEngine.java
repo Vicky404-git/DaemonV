@@ -14,20 +14,36 @@ public class MessageEngine {
     public String generate(int hour, long idleMinutes, String activeWindow, boolean isAudio, String state) {
         if (apiKey == null || apiKey.isEmpty()) return fallback(hour, idleMinutes);
 
-        // Tell the AI exactly what software is open and if music is playing
-        String windowCtx = activeWindow.equals("Unknown") ? "" : " They are focusing on the software/window: '" + activeWindow + "'.";
-        String audioCtx = isAudio ? " Background music or audio is currently playing." : " The environment is completely silent (no audio).";
-        String stateCtx = " Current state: " + state + ".";
+        String windowCtx = activeWindow.equals("Unknown") ? "" : " The active window is '" + activeWindow + "'.";
+        String audioCtx = isAudio ? " Audio is playing." : " It is silent.";
         
+        // Dynamic Personality Routing based on Behavior State
+        String personalityInstructions = "";
+        
+        switch(state) {
+            case "DISTRACTED":
+                // The Roast
+                personalityInstructions = "You are a sarcastic, slightly judgmental AI. Roast the user lightly for procrastinating or wasting time on this specific app. Keep it under 15 words.";
+                break;
+            case "IDLE":
+                // The Philosophy
+                personalityInstructions = "You are a deeply philosophical AI. Ponder the nature of time, stillness, or the void of an unused machine. Be poetic and slightly haunting. Keep it under 15 words.";
+                break;
+            case "FOCUSED":
+                // The Vibe / Motivation
+                personalityInstructions = "You are a stoic, quiet observer. Acknowledge the user's deep focus and work. Provide a brief, atmospheric observation. Keep it under 15 words.";
+                break;
+            default:
+                // Passive / General
+                personalityInstructions = "Generate a single, short, atmospheric sentence about their current digital context. Do not use quotes.";
+        }
+
         String prompt = String.format(
-            "You are a quiet, observant background process. It is currently %d:00. " +
-            "The user has been idle for %d minutes.%s%s%s " +
-            "Generate a single, short, atmospheric sentence about their current context, software, or presence. " +
-            "Do not use quotes. Do not offer help. Do not act like an AI.",
-            hour, idleMinutes, windowCtx, audioCtx, stateCtx
+            "It is currently %d:00. The user has been idle for %d minutes.%s%s %s Do not act like a helpful assistant.",
+            hour, idleMinutes, windowCtx, audioCtx, personalityInstructions
         );
 
-        String body = String.format("{\"model\": \"llama-3.1-8b-instant\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}], \"temperature\": 0.7, \"max_tokens\": 60}", 
+        String body = String.format("{\"model\": \"llama-3.1-8b-instant\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}], \"temperature\": 0.8, \"max_tokens\": 40}", 
                                     prompt.replace("\"", "\\\"").replace("\n", " "));
 
         try {
