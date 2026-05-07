@@ -1,85 +1,167 @@
 # 📝 Example Output
 
-When DaemonV triggers, it logs an event to the console and attempts to send a native desktop notification (Windows Toast or Linux `notify-send`).
+## Startup
 
-### Standard Run (Debug Mode)
-Here is an example of the console output when running `java -cp out Debug --ask` with a valid Groq API key:
-
-DaemonV 
-Mode: Background Observer
+```text
+DaemonV v0.3 (Context-Aware)
 AI: Enabled (Groq)
---------------------------------
-Manual trigger mode enabled.
 [Daemon] Control Server listening on port 9333
-[2026-03-11T18:18:28.746] As the last rays of daylight fade beyond the horizon, the evening's silence is woven from the threads of time itself.
-[2026-03-11T18:18:34.038] Shadows creep across the room, a gentle reminder that even in stillness, time continues its insistent creep.
-[2026-03-11T18:18:39.183] As the last rays of sunlight fade into the evening, the room's gentle silence is woven from the threads of forgotten hours.
+```
 
-## Fallback Mode (No Internet / No API Key)
-If the .env file is missing, the API key is invalid, or the connection drops, DaemonV automatically switches to its internal weighted fallback system:
+---
 
-DaemonV 
-Mode: Background Observer
-AI: Disabled (Mock)
---------------------------------
-[Daemon] Control Server listening on port 9333
-[2026-03-11T20:45:12.112] Time is a flat circle, and I am watching the loop.
-[2026-03-11T20:50:12.112] Another interval has passed into the void.
+# 🧠 Focused State
 
-## Night Window (Late Night Fallback)
-If it is between midnight and 5:00 AM, the fallback messages shift to match the late hour:
+```text
+[2026-05-07T01:42:11]
+The terminal hums softly beneath another unfinished idea.
+```
 
-[2026-03-12T02:15:00.000] The world is asleep. Your screen is the only sun.
-[2026-03-12T03:15:00.000] The background noise of the universe is louder at this hour.
+```text
+[2026-05-07T02:18:04]
+Neovim glows like a lighthouse in the dark apartment.
+```
 
-## Silent Mode
-DaemonV can be placed in silent mode for a specified duration. During this time, no notifications will be triggered. The silent mode can be enabled for a specified number of minutes using the `enableSilent` function.
+```text
+[2026-05-07T03:09:52]
+Your machine sounds alive tonight.
+```
 
-## Customizable Schedule
-The daemon's trigger schedule can be customized. By default, it is set to trigger between 10 PM and 7 AM. The schedule can be updated using the `setSchedule` function.
+---
 
-## Forced Trigger
-The daemon can be forced to trigger immediately using the `forceTrigger` function.
+# 📱 Distracted State
 
-## System Monitor
-The system monitor tracks the system's idle time and active window. The idle time can be obtained using the `getIdleMinutes` function and the active window can be obtained using the `getActiveWindow` function.
+```text
+[2026-05-07T21:12:55]
+Another Reddit tab. Another hour erased quietly.
+```
 
-## Event Logging
-All events are logged to a dataset file named "dataset.csv". The events are logged using the `notifyAndLog` function.
+```text
+[2026-05-07T21:44:17]
+YouTube autoplays like an endless corridor.
+```
 
-## Debug Mode
-In debug mode, the daemon can be run with a custom interval and check period using the `setDebugMode` function.
+```text
+[2026-05-07T22:08:49]
+The algorithm keeps feeding the void.
+```
 
-## Environment Variables
-The daemon uses environment variables stored in a .env file. The GROQ_API_KEY variable is required for AI-powered notifications. The environment variables can be loaded using the `load` function and accessed using the `get` function.
+---
 
-## Remote Control
-The daemon has a remote control server that listens on port 9333. The server can be started using the `startServer` function.
+# 🎧 Passive State
 
-## Diagnostics
-The daemon can run diagnostics using the `runDiagnostics` function. 
+```text
+[2026-05-07T18:02:30]
+Music leaks into the room like distant weather.
+```
 
-## Menu
-The daemon has a menu that can be started using the `startMenu` function. 
+```text
+[2026-05-07T18:18:44]
+The speakers breathe softly in the background.
+```
 
-## Sending Commands
-The daemon can send commands using the `send` function. 
+---
 
-## Daemon Controls
-The daemon has several controls that can be used to customize its behavior. These include:
+# 🌑 Idle State
 
-- `setInterval`: sets the interval between triggers
-- `setSchedule`: sets the schedule for triggers
-- `forceTrigger`: forces the daemon to trigger immediately
-- `enableSilent`: enables silent mode for a specified duration
-- `setDebugMode`: sets the debug mode interval and check period
+```text
+[2026-05-07T03:55:00]
+The machine waits patiently in an empty room.
+```
 
-## Functions
-The daemon has several functions that can be used to interact with it. These include:
+```text
+[2026-05-07T04:10:27]
+Dust settles across silent circuitry.
+```
 
-- `isSilentNow`: checks if the daemon is currently in silent mode
-- `getIdleMinutes`: gets the system's idle time
-- `getActiveWindow`: gets the active window
-- `notifyAndLog`: logs an event to the dataset file
-- `generate`: generates a notification message using the AI engine
-- `fallback`: generates a fallback notification message
+---
+
+# ⚠ Fallback Mode
+
+When:
+
+* no internet exists
+* API fails
+* `.env` is missing
+
+DaemonV switches to local fallback messages.
+
+```text
+[2026-05-07T01:00:00]
+The world is asleep. Your screen is the only sun.
+```
+
+```text
+[2026-05-07T19:15:00]
+Time is a flat circle, and I am watching the loop.
+```
+
+---
+
+# 🌙 Silent Mode
+
+```text
+[2026-05-07T22:00:00]
+Entering Silent Mode
+```
+
+During silent mode:
+
+* notifications stop
+* daemon still runs
+* monitoring continues
+
+---
+
+# 🛰 Remote Commands
+
+## Force Trigger
+
+```text
+TRIGGER
+→ Trigger queued.
+```
+
+---
+
+## Silence For 60 Minutes
+
+```text
+SILENT 60
+→ Silenced.
+```
+
+---
+
+## Manual Notification
+
+```text
+NOTIFY take a break.
+→ Notification sent.
+```
+
+---
+
+# 🧪 Debug Diagnostics
+
+```text
+==== DaemonV Debug & Diagnostic Suite ====
+
+[1] Checking .env file... OK
+[2] Checking Sensors... OK
+[3] Testing Output & Dataset... OK
+[4] Testing AI Context Engine (Groq)... OK
+```
+
+---
+
+# 📊 Dataset Example
+
+```csv
+timestamp,hour,idle,window,silent,reason,message
+
+2026-05-07T21:12:55,21,0,"reddit",false,DISTRACTED,"Another tab opened."
+
+2026-05-07T03:55:00,3,48,"Desktop",false,IDLE,"Dust settles across silent circuitry."
+```
+

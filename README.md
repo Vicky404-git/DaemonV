@@ -1,30 +1,82 @@
 # 🧠 DaemonV
 
-A quiet process that lives in the background
-and occasionally reminds you that time is moving.
+DaemonV is a lightweight context-aware background daemon written in Java.
 
-DaemonV is a small Java daemon that runs continuously and speaks rarely.
+It quietly runs in the background,
+checks the time,
+observes what you're doing,
+and occasionally reacts.
 
-It does not optimize your life.
-It does not track streaks.
-It does not care about productivity.
+Sometimes it gives atmosphere.
 
-It just watches the clock
-and sometimes says something.
+Sometimes philosophy.
 
-### What It Is
+Sometimes it roasts you for wasting 3 hours on YouTube at 2 AM.
 
-A background observer.
+It is not a productivity app.
+It is not a virtual assistant.
+It does not open apps or automate your life.
 
-* Time-aware
-* Silence-aware
-* Interval-based
-* Minimal
-* Console-driven
+DaemonV is more like a passive digital presence inside your operating system.
 
-No GUI.
-No heavy frameworks.
-No bloated dependencies.
+---
+
+# Core Goals
+
+* Runs silently in the background
+* Uses very little memory
+* Detects time, idle state, audio, and active windows
+* Generates contextual observations using AI
+* Roasts distractions and doomscrolling
+* Produces atmospheric / philosophical messages
+* Works across Linux and Windows
+* Feels more like a machine spirit than an assistant
+
+---
+
+# What It Is
+
+DaemonV sits quietly in your system tray area of existence and watches:
+
+* terminals
+* browsers
+* music
+* coding sessions
+* idle machines
+* late-night scrolling
+
+Then responds with short contextual thoughts.
+
+Examples:
+
+> “The terminal glows like a furnace tonight.”
+
+> “Another Reddit tab. Another hour dissolved.”
+
+> “The world is asleep. Your screen is the only sun.”
+
+---
+
+# What It Is NOT
+
+DaemonV does NOT:
+
+* open applications
+* automate workflows
+* schedule tasks
+* replace your OS
+* act like Jarvis
+
+It exists purely for:
+
+* atmosphere
+* presence
+* context
+* digital mood
+* ambient commentary
+
+A small machine consciousness living quietly beside your workflow.
+
 
 ### What It Does
 
