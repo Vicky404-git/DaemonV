@@ -1,50 +1,64 @@
 # 📖 DaemonV Manual
 
-## 1. Requirements
+# Requirements
 
-### Linux
+## Linux
 
-Install:
+Install dependencies:
 
-* Java 17+
-* `notify-send`
-* `xdotool`
-* `pactl` or `wpctl`
+### Arch Linux
 
-### Windows
-
-Install:
-
-* Java 17+
-* PowerShell enabled
-
----
-
-# 2. Setup
-
-## Create `.env`
-
-Inside the project root:
-
-```env
-GROQ_API_KEY=gsk_your_api_key_here
+```bash
+sudo pacman -S xdotool xprintidle libnotify
 ```
 
-Get a free API key from:
+### Debian / Ubuntu
 
-[GroqCloud](https://console.groq.com?utm_source=chatgpt.com)
+```bash
+sudo apt install xdotool xprintidle libnotify-bin
+```
 
-If the API key is missing, DaemonV switches to fallback mode automatically.
+Required:
+
+* Java 17+
+* `xdotool`
+* `xprintidle`
+* `notify-send`
+* `pactl` or `wpctl`
 
 ---
 
-# 3. Building
+## Windows
+
+Required:
+
+* Java 17+
+* PowerShell
+
+---
+
+# Setup
+
+Create `.env` in the project root:
+
+```env
+GROQ_API_KEY=gsk_your_key_here
+```
+
+Get a free API key:
+
+https://console.groq.com
+
+---
+
+# Build
 
 ## Linux
 
 ```bash
 mkdir -p out
 javac -d out src/**/*.java
+jar cfe DaemonV.jar Main -C out .
 ```
 
 ## Windows
@@ -55,93 +69,72 @@ javac -d out src/**/*.java
 
 ---
 
-# 4. Running
+# Running
 
 ## Production Mode
 
-Long intervals + silent windows enabled.
-
 ```bash
-java -cp out Main
+java -jar DaemonV.jar
 ```
 
 ---
 
 ## Debug Mode
 
-Fast testing mode.
-
 ```bash
-java -cp out Debug
+java -jar DaemonV.jar --debug
 ```
 
 Debug mode:
 
 * triggers every 5 seconds
-* ignores silent windows
+* bypasses silent windows
 * runs diagnostics
 
 ---
 
-# 5. Command Line Flags
+# Running In Background
 
-## `--ask`
-
-Immediately forces a trigger.
+## Linux
 
 ```bash
-java -cp out Main --ask
+nohup java -jar DaemonV.jar &
 ```
 
 ---
 
-## `--silent <minutes>`
+# Stop Daemon
 
-Starts in temporary silent mode.
+## Linux
 
 ```bash
-java -cp out Main --silent 60
+pkill -f DaemonV
 ```
 
 ---
 
-## `--debug`
+# CLI Flags
 
-Enables debug timing.
-
-```bash
-java -cp out Main --debug
-```
-
----
-
-## `--menu`
-
-Opens remote CLI menu.
-
-```bash
-java -cp out Main --menu
-```
+| Flag                 | Description              |
+| -------------------- | ------------------------ |
+| `--menu`             | Open remote control menu |
+| `--debug`            | Fast debug intervals     |
+| `--ask`              | Force immediate trigger  |
+| `--silent <minutes>` | Temporary silence        |
 
 ---
 
-# 6. Remote Control System
+# Remote Control
 
-DaemonV runs a socket control server on:
+DaemonV runs a TCP socket server on:
 
 ```text
 localhost:9333
 ```
 
-You can interact with it from:
-
-* another terminal
-* scripts
-* external tools
-
 ---
 
-## Available Commands
+## Commands
 
 ### Status
 
@@ -149,41 +142,25 @@ You can interact with it from:
 STATUS
 ```
 
----
-
-### Temporary Silence
-
-```text
-SILENT 30
-```
-
----
-
-### Change Trigger Interval
-
-```text
-INTERVAL 120
-```
-
----
-
 ### Force Trigger
 
 ```text
 TRIGGER
 ```
 
----
-
-### Send Manual Notification
+### Temporary Silence
 
 ```text
-NOTIFY wake up.
+SILENT 60
 ```
 
----
+### Change Interval
 
-### Shutdown Daemon
+```text
+INTERVAL 120
+```
+
+### Shutdown
 
 ```text
 EXIT
@@ -191,64 +168,90 @@ EXIT
 
 ---
 
-# 7. Behavior States
+# systemd Autostart
 
-DaemonV classifies behavior automatically.
+Create:
 
-| State        | Meaning                          |
-| ------------ | -------------------------------- |
-| `FOCUSED`    | Coding / terminal work           |
-| `DISTRACTED` | Doomscrolling / passive browsing |
-| `PASSIVE`    | Music or passive media           |
-| `IDLE`       | User absent                      |
+```text
+~/.config/systemd/user/daemonv.service
+```
 
-These states affect:
+Contents:
 
-* AI personality
-* tone
-* generated observations
+```ini
+[Unit]
+Description=DaemonV
+
+[Service]
+ExecStart=/usr/bin/java -jar /path/to/DaemonV.jar
+Restart=always
+
+[Install]
+WantedBy=default.target
+```
+
+Enable:
+
+```bash
+systemctl --user enable daemonv
+systemctl --user start daemonv
+```
 
 ---
 
-# 8. Logging
+# Troubleshooting
 
-All events are stored in:
+## No Notifications
+
+Ensure:
+
+* `notify-send` exists
+* desktop notifications are enabled
+
+Test manually:
+
+```bash
+notify-send "DaemonV" "test"
+```
+
+---
+
+## Active Window Detection Broken
+
+Ensure:
+
+* you are using X11
+* `xdotool` is installed
+
+Wayland support is currently experimental.
+
+---
+
+## No AI Messages
+
+Check:
+
+* internet connection
+* `.env` exists
+* API key is valid
+
+DaemonV automatically falls back to local messages if AI fails.
+
+---
+
+# Log Files
+
+DaemonV stores logs in:
 
 ```text
 dataset.csv
 ```
 
-Stored fields:
+Fields:
 
 * timestamp
-* idle duration
+* idle time
 * active window
-* silent status
-* detected state
+* state
 * generated message
-
----
-
-# 9. Linux Notes
-
-DaemonV currently works best on:
-
-* X11
-* i3
-* KDE X11
-* XFCE
-
-Wayland support is experimental.
-
----
-
-# 10. Philosophy
-
-DaemonV is not an assistant.
-
-It does not help you.
-
-It observes you.
-
-Quietly.
 

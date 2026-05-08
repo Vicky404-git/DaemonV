@@ -1,6 +1,6 @@
 # 📝 Example Output
 
-## Startup
+# Startup
 
 ```text
 DaemonV v0.3 (Context-Aware)
@@ -10,7 +10,7 @@ AI: Enabled (Groq)
 
 ---
 
-# 🧠 Focused State
+# 🧠 Focused
 
 ```text
 [2026-05-07T01:42:11]
@@ -23,13 +23,18 @@ Neovim glows like a lighthouse in the dark apartment.
 ```
 
 ```text
-[2026-05-07T03:09:52]
-Your machine sounds alive tonight.
+[2026-05-07T03:12:44]
+The compiler fears what you're about to commit.
+```
+
+```text
+[2026-05-07T04:22:10]
+Even the terminal looks tired.
 ```
 
 ---
 
-# 📱 Distracted State
+# 📱 Distracted
 
 ```text
 [2026-05-07T21:12:55]
@@ -38,7 +43,7 @@ Another Reddit tab. Another hour erased quietly.
 
 ```text
 [2026-05-07T21:44:17]
-YouTube autoplays like an endless corridor.
+You opened YouTube “for one video.”
 ```
 
 ```text
@@ -46,9 +51,14 @@ YouTube autoplays like an endless corridor.
 The algorithm keeps feeding the void.
 ```
 
+```text
+[2026-05-07T23:50:00]
+Three monitors. Seventeen tabs. Zero progress.
+```
+
 ---
 
-# 🎧 Passive State
+# 🎧 Passive
 
 ```text
 [2026-05-07T18:02:30]
@@ -62,7 +72,7 @@ The speakers breathe softly in the background.
 
 ---
 
-# 🌑 Idle State
+# 🌑 Idle
 
 ```text
 [2026-05-07T03:55:00]
@@ -136,7 +146,7 @@ SILENT 60
 ## Manual Notification
 
 ```text
-NOTIFY take a break.
+NOTIFY wake up.
 → Notification sent.
 ```
 
