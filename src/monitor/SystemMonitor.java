@@ -14,6 +14,17 @@ public class SystemMonitor {
 
     public static long getIdleMinutes() {
         try {
+            if (!System.getProperty("os.name").toLowerCase().contains("win")) {
+                // True system idle (Mouse + Keyboard) for Linux
+                Process p = new ProcessBuilder("xprintidle").start();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String line = reader.readLine();
+                if (line != null && !line.isBlank()) {
+                    return Long.parseLong(line.trim()) / 60000;
+                }
+            }
+
+            // Fallback to purely Mouse tracking
             Point current = MouseInfo.getPointerInfo().getLocation();
             if (lastLocation != null && current.equals(lastLocation)) {
                 return (System.currentTimeMillis() - idleStartTime) / 60000;
@@ -21,7 +32,10 @@ public class SystemMonitor {
             lastLocation = current;
             idleStartTime = System.currentTimeMillis();
             return 0;
-        } catch (Exception e) { return 0; }
+
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public static String getActiveWindow() {
@@ -40,7 +54,6 @@ public class SystemMonitor {
                 String line = reader.readLine();
                 result = (line != null && !line.isBlank()) ? line.trim() : "Desktop";
             } else {
-                // THE FIX: Automatically hunt down the terminal's child process if it's a generic shell window
                 String script = "title=$(xdotool getwindowfocus getwindowname 2>/dev/null); " +
                                 "if echo \"$title\" | grep -qiE 'terminal|alacritty|kitty|bash|zsh|i3|~'; then " +
                                 "pid=$(xdotool getwindowfocus getwindowpid 2>/dev/null); " +
@@ -71,7 +84,6 @@ public class SystemMonitor {
                 }
                 return false;
             } else {
-                // THE FIX: Added 'wpctl' for Debian Trixie PipeWire support (YouTube Music)
                 String script = "grep -q 'RUNNING' /proc/asound/card*/pcm*/sub*/status 2>/dev/null || " +
                                 "pactl list sink-inputs 2>/dev/null | grep -q 'State: RUNNING' || " +
                                 "wpctl status 2>/dev/null | grep -qi 'running'";

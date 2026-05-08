@@ -8,7 +8,6 @@ import java.util.concurrent.Executors;
 import logging.EventLogger;
 import monitor.SystemMonitor;
 
-
 public class Daemon {
 
     private volatile boolean silentEnabled = false;
@@ -50,27 +49,60 @@ public class Daemon {
         this.cooldownMillis = seconds * 1000L;
     }
 
+    // Instantly bypasses sleep to fire the AI
     public void forceTrigger() {
-        this.lastTriggerEpoch = 0;
+        lastTriggerEpoch = System.currentTimeMillis(); 
+        
+        executor.submit(() -> {
+            long idle = SystemMonitor.getIdleMinutes();
+            String window = SystemMonitor.getActiveWindow();
+            boolean isAudio = SystemMonitor.isAudioPlaying();
+            String state = BehaviorEngine.classify(idle, window, isAudio);
+            
+            String msg = ai.generate(
+                    LocalTime.now().getHour(),
+                    idle,
+                    window,
+                    isAudio,
+                    state
+            );
+            
+            EventLogger.notifyAndLog(msg, idle, window, false, "Manual Trigger");
+        });
     }
 
     public boolean isSilentNow() {
         if (silentEnabled && System.currentTimeMillis() < silentUntilEpoch) return true;
+        if (silentEnabled && System.currentTimeMillis() >= silentUntilEpoch) silentEnabled = false;
         if (ignoreSilentWindow) return false;
 
         int h = LocalTime.now().getHour();
+        // FIXED: Handles both overnight (22 -> 7) and same-day (9 -> 17) ranges gracefully
+        if (scheduleStartHour > scheduleEndHour) {
+            return h >= scheduleStartHour || h < scheduleEndHour;
+        } else {
+            return h >= scheduleStartHour && h < scheduleEndHour;
+        }
+    }
 
-        return (scheduleStartHour > scheduleEndHour)
-                ? (h >= scheduleStartHour || h < scheduleEndHour)
-                : (h >= scheduleStartHour && h < scheduleEndHour);
+    // Graceful shutdown for systemd
+    public void stop() {
+        System.out.println("Stopping DaemonV safely...");
+        running = false;
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+        }
     }
 
     @SuppressWarnings("BusyWait")
     public void start() {
-
         while (running) {
             try {
-
                 boolean silent = isSilentNow();
                 long idle = SystemMonitor.getIdleMinutes();
                 String window = SystemMonitor.getActiveWindow();
@@ -89,7 +121,6 @@ public class Daemon {
                         );
                         silentLogged = true;
                     }
-
                     Thread.sleep(60 * 1000);
                     continue;
                 } else {
@@ -123,7 +154,6 @@ public class Daemon {
                 });
 
                 lastTriggerEpoch = now;
-
                 Thread.sleep(checkSleepMillis);
 
             } catch (InterruptedException e) {
@@ -133,11 +163,5 @@ public class Daemon {
                 e.printStackTrace();
             }
         }
-    }
-
-    public void stop() {
-        System.out.println("Stopping DaemonV...");
-        running = false;
-        executor.shutdownNow();
     }
 }

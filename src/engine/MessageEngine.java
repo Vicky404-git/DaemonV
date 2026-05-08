@@ -51,11 +51,14 @@ public class MessageEngine {
 
             HttpResponse<String> res = http.send(req, HttpResponse.BodyHandlers.ofString());
             if (res.statusCode() == 200) {
-                int start = res.body().indexOf("\"content\":\"") + 11;
-                int end = res.body().indexOf("\"", start);
-                return res.body().substring(start, end).replace("\\n", " ").replace("\\\"", "\"");
+                // Native, dependency-free regex parsing for safety
+                java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"content\"\\s*:\\s*\"(.*?)\"").matcher(res.body());
+                if (m.find()) {
+                    return m.group(1).replace("\\n", " ").replace("\\\"", "\"");
+                }
             }
-        } catch (IOException | InterruptedException ignored) {}
+        } catch (IOException | InterruptedException ignored) {} // <-- Missing bracket was added here
+        
         return fallback(hour, idleMinutes);
     }
 

@@ -1,0 +1,12 @@
+[Unit]
+Description=DaemonV Observer
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/java -Xmx32m -Xms16m -jar %h/.daemonv/daemonv.jar
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
