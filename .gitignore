@@ -26,6 +26,7 @@ dataset.csv
 Thumbs.db
 
 # Build folders
+.jar
 build/
 out/
 target/

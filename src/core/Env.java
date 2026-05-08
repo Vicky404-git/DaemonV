@@ -6,16 +6,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Env {
+
     private static final Map<String, String> ENV = new HashMap<>();
 
     public static void load() {
         try {
-            Files.readAllLines(Paths.get(".env")).forEach(line -> {
-                if (line.contains("=") && !line.trim().startsWith("#")) {
-                    String[] parts = line.split("=", 2);
-                    ENV.put(parts[0].trim(), parts[1].trim());
-                }
-            });
+            String home = System.getProperty("user.home");
+
+            Files.readAllLines(Paths.get(home + "/.daemonv/.env"))
+                .forEach(line -> {
+                    if (line.contains("=") && !line.trim().startsWith("#")) {
+
+                        String[] parts = line.split("=", 2);
+
+                        ENV.put(parts[0].trim(), parts[1].trim());
+                    }
+                });
+
         } catch (Exception ignored) {}
     }
 

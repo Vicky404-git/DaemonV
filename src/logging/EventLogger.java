@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 public class EventLogger {
 
-    private static final String DATASET_FILE = "dataset.csv";
+    private static final String DATASET_FILE = System.getProperty("user.home") + "/.daemonv/dataset.csv";
 
     public static void notifyAndLog(String message, long idle, String window, boolean isSilent, String reason) {
 
