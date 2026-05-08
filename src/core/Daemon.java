@@ -22,7 +22,7 @@ public class Daemon {
     private volatile int scheduleStartHour = 22;
     private volatile int scheduleEndHour = 7;
 
-    private volatile long cooldownMillis = 4 * 60 * 60 * 1000L;
+    private volatile long cooldownMillis = 2 * 60 * 60 * 1000L;
     private volatile long checkSleepMillis = 5 * 60 * 1000L;
 
     private volatile boolean ignoreSilentWindow = false;
