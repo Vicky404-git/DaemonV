@@ -65,7 +65,6 @@ DaemonV does NOT:
 * automate workflows
 * schedule tasks
 * replace your OS
-* act like Jarvis
 
 It exists purely for:
 
