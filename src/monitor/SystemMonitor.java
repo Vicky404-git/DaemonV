@@ -54,19 +54,26 @@ public class SystemMonitor {
                 String line = reader.readLine();
                 result = (line != null && !line.isBlank()) ? line.trim() : "Desktop";
             } else {
-                String script = "title=$(xdotool getwindowfocus getwindowname 2>/dev/null); " +
-                                "if echo \"$title\" | grep -qiE 'terminal|alacritty|kitty|bash|zsh|i3|~'; then " +
-                                "pid=$(xdotool getwindowfocus getwindowpid 2>/dev/null); " +
-                                "if [ -n \"$pid\" ]; then " +
-                                "child=$(ps --ppid $pid -o comm= | tail -n 1); " +
-                                "if [ -n \"$child\" ]; then echo \"Terminal ($child)\"; exit 0; fi; " +
-                                "fi; echo \"Terminal\"; else echo \"$title\"; fi";
+                // THE FIX: Added native Hyprland support for Wayland setups
+                String script = 
+                    "if command -v hyprctl >/dev/null 2>&1; then " +
+                    "  app=$(hyprctl activewindow 2>/dev/null | grep 'class: ' | awk '{print $2}'); " +
+                    "  if [ -n \"$app\" ]; then echo \"$app\"; exit 0; fi; " +
+                    "fi; " +
+                    "title=$(xdotool getwindowfocus getwindowname 2>/dev/null); " +
+                    "if echo \"$title\" | grep -qiE 'terminal|alacritty|kitty|bash|zsh|i3|~'; then " +
+                    "  pid=$(xdotool getwindowfocus getwindowpid 2>/dev/null); " +
+                    "  if [ -n \"$pid\" ]; then " +
+                    "    child=$(ps --ppid $pid -o comm= | tail -n 1); " +
+                    "    if [ -n \"$child\" ]; then echo \"Terminal ($child)\"; exit 0; fi; " +
+                    "  fi; echo \"Terminal\"; " +
+                    "else echo \"$title\"; fi";
                                 
                 Process p = new ProcessBuilder("sh", "-c", script).start();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
                 String line = reader.readLine();
-                result = (line != null) ? line.trim() : "Desktop";
-            }
+                result = (line != null && !line.isBlank()) ? line.trim() : "Desktop";
+            }      
             lastWindow = result;
             return result;
         } catch (Exception e) { return lastWindow; }
