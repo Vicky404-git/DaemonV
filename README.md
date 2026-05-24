@@ -20,6 +20,10 @@ No bloat.
 Pure Java.
 Zero dependencies.
 
+# ![DaemonV in Action](assets/screenshot_main.jpeg)
+*DaemonV passively monitoring a i3 workspace and delivering a contextual AI observation.*
+* At top right the notifications pops up
+* At rightside you can see terminal and DaemonV commands
 ---
 
 # ✨ Features
