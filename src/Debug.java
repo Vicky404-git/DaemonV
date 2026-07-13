@@ -51,7 +51,7 @@ public class Debug {
         System.out.println("[3] Testing Output & Dataset...");
         try {
             EventLogger.notifyAndLog("Diagnostic Test: System is fully operational.", 0, "Terminal", false, "Diagnostic");
-            System.out.println("    -> OK (Check desktop for popup & dataset.csv for a new row)");
+            System.out.println("    -> OK (Check desktop for popup & DaemonV_data.csv for a new row)");
         } catch (Exception e) {
             System.out.println("    -> FAIL (" + e.getMessage() + ")");
         }

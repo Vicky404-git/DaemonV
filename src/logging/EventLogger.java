@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 
 public class EventLogger {
 
-    private static final String DATASET_FILE = "dataset.csv";
+    private static final String DATASET_FILE = "DaemonV/DaemonV_data.csv";
     private static final String HEADER = "Timestamp,Hour,IdleMinutes,ActiveWindow,IsSilent,TriggerReason,Message\n";
 
     public static void notifyAndLog(String message, long idle, String window, boolean isSilent, String reason) {
@@ -36,7 +36,7 @@ public class EventLogger {
 
             if (f.length() > 5_000_000) {
                 String ts = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm"));
-                File backup = new File("dataset_" + ts + ".csv");
+                File backup = new File("DaemonV_data_" + ts + ".csv");
                 f.renameTo(backup);
                 f = new File(DATASET_FILE);
                 f.createNewFile();
