@@ -4,29 +4,45 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.File;
+
 
 public class Env {
 
-    private static final Map<String, String> ENV = new HashMap<>();
+  public static final String BASE_DIR  = System.getProperty("user.home") + File.separator + "DaemonV";
+  public static final String CSV_DIR   = BASE_DIR + File.separator + "CSVs";
+  public static final String MEM_DIR   = BASE_DIR + File.separator + "Memory";
 
-    public static void load() {
-        try {
-            String home = System.getProperty("user.home");
+  private static final Map<String, String> ENV = new HashMap<>();
 
-            Files.readAllLines(Paths.get(home + "/.daemonv/.env"))
-                .forEach(line -> {
-                    if (line.contains("=") && !line.trim().startsWith("#")) {
+  public static void load() {
+    try {
+      String home = System.getProperty("user.home");
 
-                        String[] parts = line.split("=", 2);
+      Files.readAllLines(Paths.get(home + "/.daemonv/.env"))
+        .forEach(line -> {
+          if (line.contains("=") && !line.trim().startsWith("#")) {
 
-                        ENV.put(parts[0].trim(), parts[1].trim());
-                    }
-                });
+            String[] parts = line.split("=", 2);
 
-        } catch (Exception ignored) {}
-    }
+            ENV.put(parts[0].trim(), parts[1].trim());
+          }
+        });
 
-    public static String get(String key) {
-        return ENV.getOrDefault(key, System.getenv(key));
-    }
+    } catch (Exception ignored) {}
+  }
+
+  public static String get(String key) {
+    return ENV.getOrDefault(key, System.getenv(key));
+  }
+
+  public static String getMemoryContext() {
+    try {
+      java.nio.file.Path p = java.nio.file.Paths.get(MEM_DIR + File.separator + "memory.md");
+      if (!java.nio.file.Files.exists(p)) return "";
+      String content = java.nio.file.Files.readString(p);
+      return content.length() > 500 ? content.substring(0, 500) : content;
+    } catch (Exception e) { return ""; }
+  }
+
 }
