@@ -6,6 +6,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import core.Env;
+import engine.MemoryManager;
 
 public class EventLogger {
 
@@ -68,6 +69,7 @@ public class EventLogger {
 
       Files.writeString(f.toPath(), row, StandardOpenOption.APPEND);
       rowCount++;
+      MemoryManager.checkAndSchedule(rowCount);
 
     } catch (Exception ignored) {}
   }
