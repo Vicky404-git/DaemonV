@@ -57,7 +57,7 @@ private static String readFile(String path) {
 private static String groqCall(String prompt) {
     if (apiKey == null || apiKey.isEmpty()) return "";
     String body = String.format(
-        "{\"model\": \"llama-3.1-8b-instant\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}], \"temperature\": 0.3, \"max_tokens\": 600}",
+        "{\"model\": \"openai/gpt-oss-120b\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}], \"temperature\": 0.3, \"max_tokens\": 600}",
         prompt.replace("\"", "\\\"").replace("\n", " ")
     );
     try {

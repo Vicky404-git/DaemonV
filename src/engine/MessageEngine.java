@@ -41,10 +41,10 @@ public class MessageEngine {
 
     String memPrefix = memCtx.isEmpty() ? "" : "User context: " + memCtx + "\n";
     String prompt = memPrefix + String.format(
-        "It is currently %d:00. The user has been idle for %d minutes.%s%s %s Do not act like an AI assistant. Do not offer help.",
+        "It is currently %d:00. The user has been idle for %d minutes.%s%s %s Reply with only the atmospheric sentence. Nothing else.",
         hour, idleMinutes, windowCtx, audioCtx, personalityInstructions
         );
-    String body = String.format("{\"model\": \"openai/gpt-oss-120b\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}], \"temperature\": 0.8, \"max_tokens\": 40}", 
+    String body = String.format("{\"model\": \"qwen/qwen3.8-27b\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}], \"temperature\": 0.8, \"max_tokens\": 40}", 
         prompt.replace("\"", "\\\"").replace("\n", " "));
 
         try {
