@@ -1,5 +1,6 @@
 package core;
 
+
 import engine.BehaviorEngine;
 import engine.MessageEngine;
 import java.time.LocalTime;
@@ -7,6 +8,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import logging.EventLogger;
 import monitor.SystemMonitor;
+
+import java.io.InputStream;
+import java.net.URI;
+import java.net.http.*;
+import java.nio.file.*;
+import java.time.Duration;
 
 public class Daemon {
 
@@ -99,8 +106,118 @@ public class Daemon {
         }
     }
 
+    public void checkForUpdates() {
+      new Thread(() -> {
+        try {
+          HttpClient client = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(8)).build();
+          HttpRequest req = HttpRequest.newBuilder(
+              URI.create("https://api.github.com/repos/Vicky404-git/DaemonV/releases/latest"))
+            .header("Accept", "application/vnd.github+json")
+            .GET().build();
+
+          HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
+          if (res.statusCode() != 200) return;
+
+          // Extract tag_name
+          java.util.regex.Matcher m = java.util.regex.Pattern
+            .compile("\"tag_name\"\\s*:\\s*\"([^\"]+)\"").matcher(res.body());
+          if (!m.find()) return;
+          String latest = m.group(1).replace("v", "").trim();
+          String current = Env.VERSION;
+
+          if (!isNewer(latest, current)) return;
+
+          // Notify user
+          EventLogger.notifyAndLog(
+              "DaemonV v" + latest + " is available! Use --menu > Update Settings to update.",
+              0, "DaemonV", false, "Update Available"
+              );
+
+          // Auto-update if enabled
+          if ("true".equalsIgnoreCase(Env.get("AUTO_UPDATE"))) {
+            downloadUpdate(res.body(), latest);
+          }
+
+        } catch (Exception ignored) {}
+      }).start();
+
+    }
+
+
+    private boolean isNewer(String latest, String current) {
+      try {
+        String[] l = latest.split("\\.");
+        String[] c = current.split("\\.");
+        for (int i = 0; i < Math.min(l.length, c.length); i++) {
+          int diff = Integer.parseInt(l[i]) - Integer.parseInt(c[i]);
+          if (diff > 0) return true;
+          if (diff < 0) return false;
+        }
+        return false;
+      } catch (Exception e) { return false; }
+
+    }
+
+
+    private void downloadUpdate(String body, String version) {
+      try {
+        // Extract DaemonV.jar download URL from release assets
+        java.util.regex.Matcher m = java.util.regex.Pattern
+          .compile("\"browser_download_url\"\\s*:\\s*\"([^\"]+DaemonV\\.jar)\"").matcher(body);
+        if (!m.find()) return;
+        String url = m.group(1);
+
+        HttpClient client = HttpClient.newBuilder()
+          .connectTimeout(Duration.ofSeconds(30)).build();
+        HttpRequest req = HttpRequest.newBuilder(URI.create(url)).GET().build();
+
+        Path newJar = Paths.get(System.getProperty("user.home") + "/.daemonv/daemonv_new.jar");
+        client.send(req, HttpResponse.BodyHandlers.ofFile(newJar));
+
+        System.out.println("[Updater] Downloaded v" + version + " to " + newJar);
+
+        if ("true".equalsIgnoreCase(Env.get("AUTO_RESTART"))) {
+          restartDaemon();
+        } else {
+          EventLogger.notifyAndLog(
+              "DaemonV v" + version + " downloaded. Restart to apply.",
+              0, "DaemonV", false, "Update Ready"
+              );
+        }
+
+      } catch (Exception e) {
+        System.out.println("[Updater] Download failed: " + e.getMessage());
+      }
+
+    }
+
+
+    private void restartDaemon() {
+      try {
+        Path newJar  = Paths.get(System.getProperty("user.home") + "/.daemonv/daemonv_new.jar");
+        Path currJar = Paths.get(System.getProperty("user.home") + "/.daemonv/daemonv.jar");
+        Files.move(newJar, currJar, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+
+        EventLogger.notifyAndLog(
+            "DaemonV updated. Restarting...", 0, "DaemonV", false, "Restarting"
+            );
+
+        // Launch new process then stop self
+        new ProcessBuilder("bash", "-c",
+            "sleep 2 && java -jar " + currJar.toString() + " &")
+          .start();
+
+        stop();
+
+      } catch (Exception e) {
+        System.out.println("[Updater] Restart failed: " + e.getMessage());
+      }
+    }
+
     @SuppressWarnings("BusyWait")
     public void start() {
+      checkForUpdates();
         while (running) {
             try {
                 boolean silent = isSilentNow();

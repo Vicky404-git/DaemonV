@@ -9,6 +9,7 @@ import java.io.File;
 
 public class Env {
 
+  public static final String VERSION = "1.1.0";
   public static final String BASE_DIR  = System.getProperty("user.home") + File.separator + "DaemonV";
   public static final String CSV_DIR   = BASE_DIR + File.separator + "CSVs";
   public static final String MEM_DIR   = BASE_DIR + File.separator + "Memory";
@@ -44,5 +45,30 @@ public class Env {
       return content.length() > 500 ? content.substring(0, 500) : content;
     } catch (Exception e) { return ""; }
   }
+
+  public static void set(String key, String value) {
+    try {
+        String home = System.getProperty("user.home");
+        java.nio.file.Path envPath = java.nio.file.Paths.get(home + "/.daemonv/.env");
+        
+        String content = "";
+        if (java.nio.file.Files.exists(envPath)) {
+            content = java.nio.file.Files.readString(envPath);
+        }
+
+        // Replace existing key or append
+        if (content.contains(key + "=")) {
+            content = content.replaceAll("(?m)^" + key + "=.*$", key + "=" + value);
+        } else {
+            content = content.trim() + "\n" + key + "=" + value + "\n";
+        }
+
+        java.nio.file.Files.writeString(envPath, content,
+            java.nio.file.StandardOpenOption.CREATE,
+            java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
+
+        ENV.put(key, value); // update in-memory too
+    } catch (Exception ignored) {}
+}
 
 }

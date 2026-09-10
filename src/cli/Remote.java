@@ -1,5 +1,6 @@
 package cli;
 
+import core.Env;
 import engine.MemoryManager;
 import core.Daemon;
 import logging.EventLogger;
@@ -90,6 +91,25 @@ public class Remote {
                                 }
                                 break;
 
+                            case "AUTOUPDATE":
+                                if (parts.length < 2) { out.println("Usage: AUTOUPDATE ON/OFF"); break; }
+                                Env.set("AUTO_UPDATE", parts[1].equalsIgnoreCase("ON") ? "true" : "false");
+                                out.println("Auto update: " + parts[1].toUpperCase());
+                                break;
+
+
+                            case "AUTORESTART":
+                                if (parts.length < 2) { out.println("Usage: AUTORESTART ON/OFF"); break; }
+                                Env.set("AUTO_RESTART", parts[1].equalsIgnoreCase("ON") ? "true" : "false");
+                                out.println("Auto restart: " + parts[1].toUpperCase());
+                                break;
+
+
+                            case "CHECKUPDATE":
+                                daemon.checkForUpdates();
+                                out.println("Checking for updates...");
+                                break;
+
                             case "UPGRADE":
                                 MemoryManager.runUpgrade();
                                 out.println("Memory upgrade started.");
@@ -110,26 +130,58 @@ public class Remote {
     }
 
     public static void startMenu() {
-        Scanner s = new Scanner(System.in);
-        while (true) {
-            System.out.println("\n==== DaemonV Menu ====\n1. Silence (minutes)\n2. Set Interval (seconds)\n3. Force Trigger\n4. Status\n5. Test Notify\n6. Save a Note\n7. Upgrade Memory\n8. Quit DaemonV\n9. Exit CLI");
-            System.out.print("> ");
-            String input = s.nextLine();
-            
-            if (input.equals("9")) return; 
-            
-            try {
-                if (input.equals("1")) { System.out.print("Minutes: "); send("SILENT " + s.nextLine()); }
-                else if (input.equals("2")) { System.out.print("Seconds: "); send("INTERVAL " + s.nextLine()); }
-                else if (input.equals("3")) { send("TRIGGER"); }
-                else if (input.equals("4")) { send("STATUS"); }
-                else if (input.equals("5")) { send("NOTIFY test → this is a manual test"); }
-                else if (input.equals("6")) { System.out.print("Note: "); send("NOTE " + s.nextLine()); }
-                else if (input.equals("7")) { send("UPGRADE"); }
-                else if (input.equals("8")) { send("EXIT"); System.out.println("Waiting for Daemon to stop..."); return; }
-                else { System.out.println("Invalid option."); }
-            } catch (Exception e) { System.out.println("Invalid input."); }
-        }
+      Scanner s = new Scanner(System.in);
+      while (true) {
+        System.out.println("\n==== DaemonV Menu ====\n1. Silence (minutes)\n2. Set Interval (seconds)\n3. Force Trigger\n4. Status\n5. Test Notify\n6. Save a Note\n7. Upgrade Memory\n8. Update Settings\n9. Quit DaemonV\n10. Exit CLI");
+        System.out.print("> ");
+        String input = s.nextLine();
+
+        if (input.equals("10")) return;
+
+        try {
+          if (input.equals("1")) { System.out.print("Minutes: "); send("SILENT " + s.nextLine()); }
+          else if (input.equals("2")) { System.out.print("Seconds: "); send("INTERVAL " + s.nextLine()); }
+          else if (input.equals("3")) { send("TRIGGER"); }
+          else if (input.equals("4")) { send("STATUS"); }
+          else if (input.equals("5")) { send("NOTIFY test → this is a manual test"); }
+          else if (input.equals("6")) { System.out.print("Note: "); send("NOTE " + s.nextLine()); }
+          else if (input.equals("7")) { send("UPGRADE"); }
+          else if (input.equals("8")) { showUpdateMenu(s); }
+          else if (input.equals("9")) { send("EXIT"); System.out.println("Waiting for Daemon to stop..."); return; }
+          else { System.out.println("Invalid option."); }
+        } catch (Exception e) { System.out.println("Invalid input."); }
+      }
+    }
+
+    private static void showUpdateMenu(Scanner s) {
+      while (true) {
+        String autoUpdate  = "AUTO_UPDATE=true".equals("AUTO_UPDATE=" + core.Env.get("AUTO_UPDATE")) ? "ON" : "OFF";
+        String autoRestart = "AUTO_RESTART=true".equals("AUTO_RESTART=" + core.Env.get("AUTO_RESTART")) ? "ON" : "OFF";
+
+        System.out.println("\n==== Update Settings ====");
+        System.out.println("1. Auto Update: " + autoUpdate);
+        System.out.println("2. Auto Restart after update: " + autoRestart);
+        System.out.println("3. Check for update now");
+        System.out.println("4. Back");
+        System.out.print("> ");
+
+        String input = s.nextLine();
+        try {
+          if (input.equals("1")) {
+            String val = autoUpdate.equals("ON") ? "OFF" : "ON";
+            send("AUTOUPDATE " + val);
+          } else if (input.equals("2")) {
+            String val = autoRestart.equals("ON") ? "OFF" : "ON";
+            send("AUTORESTART " + val);
+          } else if (input.equals("3")) {
+            send("CHECKUPDATE");
+          } else if (input.equals("4")) {
+            return;
+          } else {
+            System.out.println("Invalid option.");
+          }
+        } catch (Exception e) { System.out.println("Invalid input."); }
+      }
     }
 
     // MISSING METHOD RESTORED BELOW:
